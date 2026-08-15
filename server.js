@@ -26,13 +26,14 @@ app.use(
 
 app.use(express.json());
 
+
 // Routes
 app.use("/api/members", memberRoutes);
 app.use("/api/auth", authRoutes);
 
 // health route
 app.get("/health", (req, res) => {
-    console.log("Health check request received:", new Date().toISOString());
+    // console.log("Health check request received:", new Date().toISOString());
   res.status(200).json({
     status: "OK",
     message: "Server is running",
@@ -70,6 +71,6 @@ app.use((error, req, res, next) => {
 
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
