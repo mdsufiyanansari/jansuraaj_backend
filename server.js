@@ -10,10 +10,8 @@ import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
 
-
 // Database
 connectDB();
-
 
 // Middleware
 app.use(
@@ -25,11 +23,9 @@ app.use(
 
 app.use(express.json());
 
-
 // Routes
 app.use("/api/members", memberRoutes);
 app.use("/api/auth", authRoutes);
-
 
 // Health check
 app.get("/", (req, res) => {
@@ -38,7 +34,6 @@ app.get("/", (req, res) => {
     message: "Jansuraaj API is running",
   });
 });
-
 
 // Error handler
 app.use((error, req, res, next) => {
@@ -56,7 +51,6 @@ app.use((error, req, res, next) => {
     message: error.message || "Something went wrong",
   });
 });
-
 
 const PORT = process.env.PORT || 4000;
 
