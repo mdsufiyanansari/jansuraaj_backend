@@ -8,15 +8,18 @@ import connectDB from "./config/db.js";
 import memberRoutes from "./routes/memberRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 
+
 const app = express();
 
 // Database
 connectDB();
 
 // Middleware
+const allowedOrigins = process.env.FRONTEND_URLS.split(",");
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -26,6 +29,15 @@ app.use(express.json());
 // Routes
 app.use("/api/members", memberRoutes);
 app.use("/api/auth", authRoutes);
+
+// health route
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Health check
 app.get("/", (req, res) => {
@@ -51,6 +63,9 @@ app.use((error, req, res, next) => {
     message: error.message || "Something went wrong",
   });
 });
+
+
+
 
 const PORT = process.env.PORT || 4000;
 
