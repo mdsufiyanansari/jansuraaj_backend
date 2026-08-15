@@ -32,6 +32,7 @@ app.use("/api/auth", authRoutes);
 
 // health route
 app.get("/health", (req, res) => {
+    console.log("Health check request received:", new Date().toISOString());
   res.status(200).json({
     status: "OK",
     message: "Server is running",
