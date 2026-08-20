@@ -3,55 +3,105 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.js";
 import memberRoutes from "./routes/memberRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-
+import problemRouter from "./routes/problemRoutes.js";
 
 const app = express();
 
-// Database
+// ==========================================
+// DATABASE
+// ==========================================
 connectDB();
 
-// Middleware
-const allowedOrigins = process.env.FRONTEND_URLS.split(",");
+// ==========================================
+// CORS
+// ==========================================
+const allowedOrigins = (process.env.FRONTEND_URLS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Postman / server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
 
-app.use(express.json());
+// ==========================================
+// BODY PARSER
+// ==========================================
+app.use(
+  express.json({
+    limit: "1mb",
+  })
+);
 
+// ==========================================
+// COOKIE PARSER
+// ==========================================
+app.use(cookieParser());
 
-// Routes
-app.use("/api/members", memberRoutes);
+// ==========================================
+// ROUTES
+// ==========================================
 app.use("/api/auth", authRoutes);
 
-// health route
+app.use("/api/members", memberRoutes);
+
+app.use("/api/problems", problemRouter);
+
+// ==========================================
+// HEALTH CHECK
+// ==========================================
 app.get("/health", (req, res) => {
-    // console.log("Health check request received:", new Date().toISOString());
   res.status(200).json({
     status: "OK",
     message: "Server is running",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Health check
+// ==========================================
+// ROOT
+// ==========================================
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     success: true,
     message: "Jansuraaj API is running",
   });
 });
 
-// Error handler
+// ==========================================
+// 404 ROUTE
+// ==========================================
+app.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
+
+// ==========================================
+// GLOBAL ERROR HANDLER
+// ==========================================
 app.use((error, req, res, next) => {
-  console.error(error);
+  console.error("Server error:", error);
 
   if (error.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({
@@ -60,17 +110,24 @@ app.use((error, req, res, next) => {
     });
   }
 
+  if (error.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      success: false,
+      message: "Origin not allowed",
+    });
+  }
+
   return res.status(500).json({
     success: false,
-    message: error.message || "Something went wrong",
+    message: "Something went wrong",
   });
 });
 
-
-
-
+// ==========================================
+// SERVER
+// ==========================================
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

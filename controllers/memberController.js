@@ -74,7 +74,12 @@ export const updateProfile = async (req, res) => {
       aadhaar,
     } = req.body;
 
-    const member = await Member.findById(req.params.id);
+    // const member = await Member.findById(req.params.id);
+
+    const member = await Member.findOne({
+      _id: req.params.id,
+      firebaseUid: req.firebaseUid,
+    });
 
     if (!member) {
       return res.status(404).json({
@@ -119,9 +124,13 @@ export const updateProfile = async (req, res) => {
 // ==================================
 export const updateLocation = async (req, res) => {
   try {
-    const { areaType, localBody, ward } = req.body;
+    const { district, areaType, localBody, ward } = req.body;
 
-    const member = await Member.findById(req.params.id);
+    // const member = await Member.findById(req.params.id);
+    const member = await Member.findOne({
+      _id: req.params.id,
+      firebaseUid: req.firebaseUid,
+    });
 
     if (!member) {
       return res.status(404).json({
@@ -130,6 +139,7 @@ export const updateLocation = async (req, res) => {
       });
     }
 
+    member.district = district || "";
     member.areaType = areaType || "";
     member.localBody = localBody || "";
     member.ward = ward || "";
@@ -158,7 +168,7 @@ export const updateLocation = async (req, res) => {
 // ==================================
 export const connectFirebaseUser = async (req, res) => {
   try {
-    const { firebaseUid } = req.body;
+    const firebaseUid = req.firebaseUid;
 
     if (!firebaseUid) {
       return res.status(400).json({
@@ -173,6 +183,26 @@ export const connectFirebaseUser = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Member not found",
+      });
+    }
+
+    // Prevent changing an already connected Firebase account
+    if (member.firebaseUid) {
+      return res.status(409).json({
+        success: false,
+        message: "Firebase account is already connected",
+      });
+    }
+
+    // Check whether this Firebase UID is already linked
+    const existingMember = await Member.findOne({
+      firebaseUid,
+    });
+
+    if (existingMember) {
+      return res.status(409).json({
+        success: false,
+        message: "Firebase account is already linked to another member",
       });
     }
 
@@ -192,7 +222,6 @@ export const connectFirebaseUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to connect Firebase account",
-      error: error.message,
     });
   }
 };
@@ -203,7 +232,11 @@ export const connectFirebaseUser = async (req, res) => {
 // ==================================
 export const getMember = async (req, res) => {
   try {
-    const member = await Member.findById(req.params.id);
+    // const member = await Member.findById(req.params.id);
+    const member = await Member.findOne({
+      _id: req.params.id,
+      firebaseUid: req.firebaseUid,
+    });
 
     if (!member) {
       return res.status(404).json({
@@ -221,6 +254,37 @@ export const getMember = async (req, res) => {
       success: false,
       message: "Failed to fetch member",
       error: error.message,
+    });
+  }
+};
+
+// ==================================
+// GET MY PROFILE
+// GET /api/members/me
+// ==================================
+export const getMyProfile = async (req, res) => {
+  try {
+    const member = await Member.findOne({
+      firebaseUid: req.firebaseUid,
+    });
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member profile not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      member,
+    });
+  } catch (error) {
+    console.error("Get my profile error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch profile",
     });
   }
 };

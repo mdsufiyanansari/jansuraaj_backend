@@ -2,52 +2,73 @@ import mongoose from "mongoose";
 
 const memberSchema = new mongoose.Schema(
   {
-    // Firebase user  ID
+    // ==================================
+    // Firebase User ID
+    // ==================================
     firebaseUid: {
       type: String,
       default: null,
+      unique: true,
+      sparse: true,
       index: true,
+      trim: true,
     },
 
-    // Profile
+    // ==================================
+    // Profile Photo
+    // ==================================
     photo: {
       type: String,
       default: "",
+      trim: true,
     },
 
+    // ==================================
+    // Name
+    // ==================================
     firstName: {
       type: String,
       default: "",
       trim: true,
+      maxlength: 100,
     },
 
     middleName: {
       type: String,
       default: "",
       trim: true,
+      maxlength: 100,
     },
 
     lastName: {
       type: String,
       default: "",
       trim: true,
+      maxlength: 100,
     },
 
     name: {
       type: String,
       default: "",
       trim: true,
+      maxlength: 250,
     },
 
-    // Personal details
+    // ==================================
+    // Personal Details
+    // ==================================
     education: {
       type: String,
       default: "",
+      trim: true,
+      maxlength: 100,
     },
 
     profession: {
       type: String,
       default: "",
+      trim: true,
+      maxlength: 100,
     },
 
     skills: {
@@ -55,12 +76,24 @@ const memberSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Aadhaar
     aadhaar: {
       type: String,
       default: "",
+      trim: true,
+      select: false,
+      match: [/^\d{0,12}$/, "Invalid Aadhaar number"],
     },
 
+    // ==================================
     // Location
+    // ==================================
+    district: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     areaType: {
       type: String,
       enum: ["", "rural", "urban"],
@@ -70,18 +103,23 @@ const memberSchema = new mongoose.Schema(
     localBody: {
       type: String,
       default: "",
+      trim: true,
     },
 
     ward: {
       type: String,
       default: "",
+      trim: true,
     },
 
-    // Registration status
+    // ==================================
+    // Registration Status
+    // ==================================
     registrationStatus: {
       type: String,
       enum: ["draft", "completed"],
       default: "draft",
+      index: true,
     },
   },
   {
