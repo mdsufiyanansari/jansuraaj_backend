@@ -83,7 +83,7 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "🚀Jansuraaj API is running",
+    message: "🚀Jansuraaj API is running🚀🎉",
   });
 });
 
@@ -129,5 +129,5 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀Server running on port ${PORT}`);
 });
