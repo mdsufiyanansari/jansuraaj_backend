@@ -10,6 +10,8 @@ import memberRoutes from "./routes/memberRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import problemRouter from "./routes/problemRoutes.js";
 
+import adminRoutes from "./routes/adminRoutes.js";
+
 const app = express();
 
 // ==========================================
@@ -66,6 +68,9 @@ app.use("/api/members", memberRoutes);
 
 app.use("/api/problems", problemRouter);
 
+//====================admin-routes=============//
+app.use("/api/admin", adminRoutes);
+
 // ==========================================
 // HEALTH CHECK
 // ==========================================
@@ -83,7 +88,7 @@ app.get("/health", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "🚀Jansuraaj API is running🎉",
+    message: "🚀Jansuraaj API is running🚀🎉",
   });
 });
 
