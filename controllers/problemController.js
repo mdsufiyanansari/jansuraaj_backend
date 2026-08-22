@@ -15,9 +15,12 @@ const escapeRegex = (value) => {
 // ==========================================
 export const getMyAreaProblems = async (req, res) => {
   try {
-    const member = await Member.findOne({
-      firebaseUid: req.firebaseUid,
-    });
+    // const member = await Member.findOne({
+    //   firebaseUid: req.firebaseUid,
+    // });
+  
+    // JWT MEMBER
+const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -110,9 +113,12 @@ export const createProblem = async (req, res) => {
     // FIREBASE USER SE MEMBER FIND
     // ==========================================
 
-    const member = await Member.findOne({
-      firebaseUid: req.firebaseUid,
-    });
+    // const member = await Member.findOne({
+    //   firebaseUid: req.firebaseUid,
+    // });
+
+    // JWT MEMBER
+const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -310,9 +316,12 @@ export const reportExistingProblem = async (req, res) => {
     // FIREBASE USER
     // ==========================================
 
-    const member = await Member.findOne({
-      firebaseUid: req.firebaseUid,
-    });
+    // const member = await Member.findOne({
+    //   firebaseUid: req.firebaseUid,
+    // });
+
+    // JWT MEMBER
+const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -423,9 +432,12 @@ export const getProblemById = async (req, res) => {
     // FIREBASE USER
     // ==========================================
 
-    const member = await Member.findOne({
-      firebaseUid: req.firebaseUid,
-    });
+    // const member = await Member.findOne({
+    //   firebaseUid: req.firebaseUid,
+    // });
+
+// JWT MEMBER
+const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({

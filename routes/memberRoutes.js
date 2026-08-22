@@ -1,13 +1,15 @@
 import express from "express";
 
 import upload from "../middleware/upload.js";
+
 import authFirebase from "../middleware/authFirebase.js";
 
 import {
   createMember,
   updateProfile,
   updateLocation,
-  connectFirebaseUser,
+  // connectFirebaseUser,
+  completeMember,
   getMember,
   getMyProfile,
 } from "../controllers/memberController.js";
@@ -15,21 +17,47 @@ import {
 const router = express.Router();
 
 // Step 1
-router.post("/", upload.single("photo"), createMember);
+router.post(
+  "/",
+  upload.single("photo"),
+  createMember
+);
 
 // Step 2
-router.put("/:id/profile", updateProfile);
+router.put(
+  "/:id/profile",
+  updateProfile
+);
 
 // Step 3
-router.put("/:id/location", updateLocation);
+router.put(
+  "/:id/location",
+  updateLocation
+);
 
-// Firebase login ke baad
-router.put("/:id/firebase", authFirebase, connectFirebaseUser);
+// Step 4
+router.put("/:id/complete", completeMember);
+
+// Firebase login ke baad - OLD / DISABLED
+/*
+router.put(
+  "/:id/firebase",
+  authFirebase,
+  connectFirebaseUser
+);
+*/
 
 // Get my profile - MUST come before /:id
-router.get("/me", authFirebase, getMyProfile);
+router.get(
+  "/me",
+  authFirebase,
+  getMyProfile
+);
 
 // Get member by ID
-router.get("/:id", getMember);
+router.get(
+  "/:id",
+  getMember
+);
 
 export default router;

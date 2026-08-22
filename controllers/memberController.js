@@ -1,5 +1,6 @@
 import Member from "../models/memberModel.js";
 import cloudinary from "../config/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 // Cloudinary upload helper
 const uploadToCloudinary = (buffer) => {
@@ -30,12 +31,31 @@ export const createMember = async (req, res) => {
   try {
     let photoUrl = "";
 
+    // ==========================================
+    // MOBILE NUMBER
+    // ==========================================
+    // const { phone } = req.body;
+
+    // const digits = String(phone || "")
+    //   .replace(/\D/g, "")
+    //   .slice(-10);
+
+    // if (!/^\d{10}$/.test(digits)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Please enter a valid 10-digit phone number",
+    //   });
+    // }
+
+    // const phoneNumber = `+91${digits}`;
+
     if (req.file) {
       const result = await uploadToCloudinary(req.file.buffer);
       photoUrl = result.secure_url;
     }
 
     const member = await Member.create({
+      // phone: phoneNumber,
       photo: photoUrl,
       registrationStatus: "draft",
     });
@@ -74,12 +94,21 @@ export const updateProfile = async (req, res) => {
       aadhaar,
     } = req.body;
 
+    // OLD FIREBASE QUERY
     // const member = await Member.findById(req.params.id);
 
+    /*
     const member = await Member.findOne({
       _id: req.params.id,
       firebaseUid: req.firebaseUid,
     });
+    */
+
+    // JWT MEMBER
+    // const member = await Member.findById(req.memberId);
+   
+    // JOIN FLOW
+const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -124,13 +153,26 @@ export const updateProfile = async (req, res) => {
 // ==================================
 export const updateLocation = async (req, res) => {
   try {
-    const { district, areaType, localBody, ward } = req.body;
+    const {
+      district,
+      areaType,
+      localBody,
+      ward,
+    } = req.body;
 
-    // const member = await Member.findById(req.params.id);
+    // OLD FIREBASE QUERY
+    /*
     const member = await Member.findOne({
       _id: req.params.id,
       firebaseUid: req.firebaseUid,
     });
+    */
+
+    // JWT MEMBER
+    // const member = await Member.findById(req.memberId);
+
+    // JOIN FLOW
+const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -157,7 +199,6 @@ export const updateLocation = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update location",
-      error: error.message,
     });
   }
 };
@@ -166,6 +207,8 @@ export const updateLocation = async (req, res) => {
 // CONNECT FIREBASE USER
 // PUT /api/members/:id/firebase
 // ==================================
+
+/*
 export const connectFirebaseUser = async (req, res) => {
   try {
     const firebaseUid = req.firebaseUid;
@@ -202,7 +245,8 @@ export const connectFirebaseUser = async (req, res) => {
     if (existingMember) {
       return res.status(409).json({
         success: false,
-        message: "Firebase account is already linked to another member",
+        message:
+          "Firebase account is already linked to another member",
       });
     }
 
@@ -225,6 +269,112 @@ export const connectFirebaseUser = async (req, res) => {
     });
   }
 };
+*/
+
+// ==================================
+// COMPLETE MEMBER REGISTRATION
+// PUT /api/members/:id/complete
+// ==================================
+export const completeMember = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    // Phone required
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required",
+      });
+    }
+
+    // Sirf digits
+    const digits = String(phone)
+      .replace(/\D/g, "")
+      .slice(-10);
+
+    // 10 digit validation
+    if (!/^\d{10}$/.test(digits)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid 10-digit phone number",
+      });
+    }
+
+    const phoneNumber = `+91${digits}`;
+
+    // Member find
+    const member = await Member.findById(req.params.id);
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+
+    // Check duplicate phone
+    const existingMember = await Member.findOne({
+      phone: phoneNumber,
+      _id: { $ne: member._id },
+    });
+
+    if (existingMember) {
+      return res.status(409).json({
+        success: false,
+        message: "This mobile number is already registered",
+      });
+    }
+
+    // Save phone
+  member.phone = phoneNumber;
+
+member.registrationStatus = "completed";
+
+await member.save();
+
+// ==========================================
+// CREATE JWT
+// ==========================================
+const token = jwt.sign(
+  {
+    memberId: member._id.toString(),
+    phone: member.phone,
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "7d",
+  }
+);
+
+// ==========================================
+// SET HTTPONLY COOKIE
+// ==========================================
+res.cookie("authToken", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite:
+    process.env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: "/",
+});
+
+return res.status(200).json({
+  success: true,
+  message: "Registration completed successfully",
+  member,
+});
+  } catch (error) {
+    console.error("Complete member error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to complete registration",
+      error: error.message,
+    });
+  }
+};
 
 // ==================================
 // GET MEMBER
@@ -232,11 +382,19 @@ export const connectFirebaseUser = async (req, res) => {
 // ==================================
 export const getMember = async (req, res) => {
   try {
-    // const member = await Member.findById(req.params.id);
+    // OLD FIREBASE QUERY
+    /*
     const member = await Member.findOne({
       _id: req.params.id,
       firebaseUid: req.firebaseUid,
     });
+    */
+
+    // JWT MEMBER
+    // const member = await Member.findById(req.memberId);
+
+    // JOIN FLOW
+const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -264,9 +422,17 @@ export const getMember = async (req, res) => {
 // ==================================
 export const getMyProfile = async (req, res) => {
   try {
+    // OLD FIREBASE QUERY
+    /*
     const member = await Member.findOne({
       firebaseUid: req.firebaseUid,
     });
+    */
+
+    // JWT MEMBER
+    const member = await Member.findById(req.memberId);
+
+    
 
     if (!member) {
       return res.status(404).json({

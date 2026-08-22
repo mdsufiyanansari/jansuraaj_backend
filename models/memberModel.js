@@ -3,8 +3,10 @@ import mongoose from "mongoose";
 const memberSchema = new mongoose.Schema(
   {
     // ==================================
-    // Firebase User ID
+    // Firebase User ID - OLD
     // ==================================
+
+    /*
     firebaseUid: {
       type: String,
       default: null,
@@ -13,6 +15,19 @@ const memberSchema = new mongoose.Schema(
       index: true,
       trim: true,
     },
+    */
+
+// ==================================
+// Mobile Number
+// ==================================
+phone: {
+  type: String,
+  default: null,
+  unique: true,
+  sparse: true,
+  index: true,
+  trim: true,
+},
 
     // ==================================
     // Profile Photo
