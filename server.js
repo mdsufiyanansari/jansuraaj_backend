@@ -23,6 +23,7 @@ connectDB();
 // CORS
 // ==========================================
 const allowedOrigins = (process.env.FRONTEND_URLS || "")
+
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
