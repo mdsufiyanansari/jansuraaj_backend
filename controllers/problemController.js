@@ -88,8 +88,10 @@ export const createProblem = async (req, res) => {
       });
     }
 
-    const { category, description, address, latitude, longitude, photos } =
-      req.body;
+    // const { category, description, address, latitude, longitude, photos } =
+    //   req.body;
+
+    const { category, description, address, photos } = req.body;
 
     // ==========================================
     // BASIC VALIDATION
@@ -196,45 +198,45 @@ const member = await Member.findById(req.memberId);
     // LATITUDE VALIDATION
     // ==========================================
 
-    if (latitude === undefined || latitude === null || latitude === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Problem location is required",
-      });
-    }
+    // if (latitude === undefined || latitude === null || latitude === "") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Problem location is required",
+    //   });
+    // }
 
-    const safeLatitude = Number(latitude);
+    // const safeLatitude = Number(latitude);
 
-    if (Number.isNaN(safeLatitude) || safeLatitude < -90 || safeLatitude > 90) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid latitude",
-      });
-    }
+    // if (Number.isNaN(safeLatitude) || safeLatitude < -90 || safeLatitude > 90) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid latitude",
+    //   });
+    // }
 
-    // ==========================================
-    // LONGITUDE VALIDATION
-    // ==========================================
+    // // ==========================================
+    // // LONGITUDE VALIDATION
+    // // ==========================================
 
-    if (longitude === undefined || longitude === null || longitude === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Problem location is required",
-      });
-    }
+    // if (longitude === undefined || longitude === null || longitude === "") {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Problem location is required",
+    //   });
+    // }
 
-    const safeLongitude = Number(longitude);
+    // const safeLongitude = Number(longitude);
 
-    if (
-      Number.isNaN(safeLongitude) ||
-      safeLongitude < -180 ||
-      safeLongitude > 180
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid longitude",
-      });
-    }
+    // if (
+    //   Number.isNaN(safeLongitude) ||
+    //   safeLongitude < -180 ||
+    //   safeLongitude > 180
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid longitude",
+    //   });
+    // }
 
     // ==========================================
     // PHOTOS
@@ -261,8 +263,8 @@ const member = await Member.findById(req.memberId);
 
       address: address ? address.toString().trim() : "",
 
-      latitude: safeLatitude,
-      longitude: safeLongitude,
+      // latitude: safeLatitude,
+      // longitude: safeLongitude,
 
       photos: safePhotos,
 

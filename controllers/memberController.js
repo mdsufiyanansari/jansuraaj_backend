@@ -91,7 +91,7 @@ export const updateProfile = async (req, res) => {
       education,
       profession,
       skills,
-      aadhaar,
+      // aadhaar,
     } = req.body;
 
     // OLD FIREBASE QUERY
@@ -127,7 +127,7 @@ const member = await Member.findById(req.params.id);
 
     member.skills = Array.isArray(skills) ? skills : [];
 
-    member.aadhaar = aadhaar || "";
+    // member.aadhaar = aadhaar || "";
 
     await member.save();
 

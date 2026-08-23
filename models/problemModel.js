@@ -170,19 +170,19 @@ const problemSchema = new mongoose.Schema(
     // ==================================
     // Problem location
     // ==================================
-    latitude: {
-      type: Number,
-      required: true,
-      min: -90,
-      max: 90,
-    },
+    // latitude: {
+    //   type: Number,
+    //   required: true,
+    //   min: -90,
+    //   max: 90,
+    // },
 
-    longitude: {
-      type: Number,
-      required: true,
-      min: -180,
-      max: 180,
-    },
+    // longitude: {
+    //   type: Number,
+    //   required: true,
+    //   min: -180,
+    //   max: 180,
+    // },
 
     // ==================================
     // Uploaded photos

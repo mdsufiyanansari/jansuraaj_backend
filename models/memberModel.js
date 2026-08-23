@@ -92,13 +92,13 @@ phone: {
     },
 
     // Aadhaar
-    aadhaar: {
-      type: String,
-      default: "",
-      trim: true,
-      select: false,
-      match: [/^\d{0,12}$/, "Invalid Aadhaar number"],
-    },
+    // aadhaar: {
+    //   type: String,
+    //   default: "",
+    //   trim: true,
+    //   select: false,
+    //   match: [/^\d{0,12}$/, "Invalid Aadhaar number"],
+    // },
 
     // ==================================
     // Location
