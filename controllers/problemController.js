@@ -18,9 +18,9 @@ export const getMyAreaProblems = async (req, res) => {
     // const member = await Member.findOne({
     //   firebaseUid: req.firebaseUid,
     // });
-  
+
     // JWT MEMBER
-const member = await Member.findById(req.memberId);
+    const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -91,7 +91,7 @@ export const createProblem = async (req, res) => {
     // const { category, description, address, latitude, longitude, photos } =
     //   req.body;
 
-    const { category, description, address, photos } = req.body;
+    const { category, description, address, photos, videoLinks } = req.body;
 
     // ==========================================
     // BASIC VALIDATION
@@ -120,7 +120,7 @@ export const createProblem = async (req, res) => {
     // });
 
     // JWT MEMBER
-const member = await Member.findById(req.memberId);
+    const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -244,6 +244,24 @@ const member = await Member.findById(req.memberId);
 
     const safePhotos = Array.isArray(photos) ? photos : [];
 
+    let safeVideoLinks = [];
+
+    try {
+      if (videoLinks) {
+        const parsedVideoLinks =
+          typeof videoLinks === "string" ? JSON.parse(videoLinks) : videoLinks;
+
+        safeVideoLinks = Array.isArray(parsedVideoLinks)
+          ? parsedVideoLinks.map((link) => String(link).trim()).filter(Boolean)
+          : [];
+      }
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid video links",
+      });
+    }
+
     // ==========================================
     // CREATE PROBLEM
     // ==========================================
@@ -267,6 +285,8 @@ const member = await Member.findById(req.memberId);
       // longitude: safeLongitude,
 
       photos: safePhotos,
+
+      videoLinks: safeVideoLinks,
 
       status: "pending",
 
@@ -323,7 +343,7 @@ export const reportExistingProblem = async (req, res) => {
     // });
 
     // JWT MEMBER
-const member = await Member.findById(req.memberId);
+    const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({
@@ -438,8 +458,8 @@ export const getProblemById = async (req, res) => {
     //   firebaseUid: req.firebaseUid,
     // });
 
-// JWT MEMBER
-const member = await Member.findById(req.memberId);
+    // JWT MEMBER
+    const member = await Member.findById(req.memberId);
 
     if (!member) {
       return res.status(404).json({

@@ -193,6 +193,14 @@ const problemSchema = new mongoose.Schema(
     },
 
     // ==================================
+    // Video links
+    // ==================================
+    videoLinks: {
+      type: [String],
+      default: [],
+    },
+
+    // ==================================
     // Problem status
     // ==================================
     status: {
