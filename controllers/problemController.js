@@ -45,14 +45,24 @@ export const getMyAreaProblems = async (req, res) => {
     // ==========================================
 
     const filter = {
-      district: member.district,
+      district: {
+        $regex: `^${escapeRegex(member.district.trim())}$`,
+        $options: "i",
+      },
+
       areaType: member.areaType,
-      ward: member.ward,
+
+      ward: {
+        $regex: `^${escapeRegex(member.ward.trim())}$`,
+        $options: "i",
+      },
     };
 
-    // Urban mein localBody bhi match hona chahiye
     if (member.areaType === "urban") {
-      filter.localBody = member.localBody;
+      filter.localBody = {
+        $regex: `^${escapeRegex((member.localBody || "").trim())}$`,
+        $options: "i",
+      };
     }
 
     const problems = await Problem.find(filter).sort({ createdAt: -1 }).lean();
