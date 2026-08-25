@@ -17,17 +17,17 @@ const memberSchema = new mongoose.Schema(
     },
     */
 
-// ==================================
-// Mobile Number
-// ==================================
-phone: {
-  type: String,
-  default: undefined,
-  unique: true,
-  sparse: true,
-  index: true,
-  trim: true,
-},
+    // ==================================
+    // Mobile Number
+    // ==================================
+    phone: {
+      type: String,
+      default: undefined,
+      unique: true,
+      sparse: true,
+      index: true,
+      trim: true,
+    },
 
     // ==================================
     // Profile Photo
@@ -125,6 +125,24 @@ phone: {
       type: String,
       default: "",
       trim: true,
+
+      set: (value) => {
+        if (!value) return "";
+
+        const ward = String(value).trim();
+
+        // अगर पहले से ward_03 format है
+        if (/^ward_\d+$/i.test(ward)) {
+          return ward.toLowerCase();
+        }
+
+        // अगर सिर्फ 3, 4, 12 आदि आया है
+        if (/^\d+$/.test(ward)) {
+          return `ward_${ward.padStart(2, "0")}`;
+        }
+
+        return ward;
+      },
     },
 
     // ==================================
