@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Problem from "../models/problemModel.js";
 import Member from "../models/memberModel.js";
+import cloudinary from "../config/cloudinary.js";
 
 // ==========================================
 // Helper: Escape regex special characters
@@ -101,7 +102,7 @@ export const createProblem = async (req, res) => {
     // const { category, description, address, latitude, longitude, photos } =
     //   req.body;
 
-    const { category, description, address, photos, videoLinks } = req.body;
+    const { category, description, address,  videoLinks } = req.body;
 
     // ==========================================
     // BASIC VALIDATION
@@ -252,7 +253,33 @@ export const createProblem = async (req, res) => {
     // PHOTOS
     // ==========================================
 
-    const safePhotos = Array.isArray(photos) ? photos : [];
+   const safePhotos = [];
+
+if (Array.isArray(req.files) && req.files.length > 0) {
+  for (const file of req.files) {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: "jansuraaj/problems",
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+        }
+      );
+
+      stream.end(file.buffer);
+    });
+
+    safePhotos.push(result.secure_url);
+  }
+}
+
+// ==========video link ===================//
 
     let safeVideoLinks = [];
 
