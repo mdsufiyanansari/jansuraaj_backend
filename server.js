@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import problemRouter from "./routes/problemRoutes.js";
 
 import adminRoutes from "./routes/adminRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
 
 const app = express();
 
@@ -68,6 +69,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/members", memberRoutes);
 
 app.use("/api/problems", problemRouter);
+
+app.use("/api/support", supportRoutes);
 
 //====================admin-routes=============//
 app.use("/api/admin", adminRoutes);
