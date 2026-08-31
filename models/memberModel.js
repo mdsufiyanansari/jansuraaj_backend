@@ -119,6 +119,28 @@ const memberSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+      index: true,
+    },
+
+    // ==================================
+    // Block
+    // ==================================
+    block: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+
+    // ==================================
+    // Panchayat
+    // Rural area ke liye
+    // ==================================
+    panchayat: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
     },
 
     ward: {

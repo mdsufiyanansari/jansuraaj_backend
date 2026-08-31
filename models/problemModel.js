@@ -136,6 +136,28 @@ const problemSchema = new mongoose.Schema(
       index: true,
     },
 
+    // ==================================
+    // Block
+    // Sirf Rural area ke liye
+    // ==================================
+    block: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+
+    // ==================================
+    // Panchayat
+    // Sirf Rural area ke liye
+    // ==================================
+    panchayat: {
+      type: String,
+      default: "",
+      trim: true,
+      index: true,
+    },
+
     // Registered ward
     ward: {
       type: String,
@@ -239,6 +261,8 @@ problemSchema.index({
   district: 1,
   areaType: 1,
   localBody: 1,
+  block: 1,
+  panchayat: 1,
   ward: 1,
   createdAt: -1,
 });

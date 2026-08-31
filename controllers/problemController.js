@@ -34,7 +34,7 @@ export const getMyAreaProblems = async (req, res) => {
     // LOCATION CHECK
     // ==========================================
 
-    if (!member.district || !member.areaType || !member.ward) {
+    if (!member.district || !member.areaType || !member.block || !member.ward) {
       return res.status(400).json({
         success: false,
         message: "Member location is incomplete",
@@ -58,6 +58,26 @@ export const getMyAreaProblems = async (req, res) => {
         $options: "i",
       },
     };
+
+    // ==========================================
+    // RURAL AREA FILTER
+    // ==========================================
+
+    if (member.areaType === "rural") {
+      filter.block = {
+        $regex: `^${escapeRegex((member.block || "").trim())}$`,
+        $options: "i",
+      };
+
+      filter.panchayat = {
+        $regex: `^${escapeRegex((member.panchayat || "").trim())}$`,
+        $options: "i",
+      };
+    }
+
+    // ==========================================
+    // URBAN AREA FILTER
+    // ==========================================
 
     if (member.areaType === "urban") {
       filter.localBody = {
@@ -102,7 +122,7 @@ export const createProblem = async (req, res) => {
     // const { category, description, address, latitude, longitude, photos } =
     //   req.body;
 
-    const { category, description, address,  videoLinks } = req.body;
+    const { category, description, address, videoLinks } = req.body;
 
     // ==========================================
     // BASIC VALIDATION
@@ -151,6 +171,24 @@ export const createProblem = async (req, res) => {
       });
     }
 
+    if (member.areaType === "rural") {
+      if (!member.block || !member.panchayat) {
+        return res.status(400).json({
+          success: false,
+          message: "Rural member location is incomplete",
+        });
+      }
+    }
+
+    if (member.areaType === "urban") {
+      if (!member.localBody) {
+        return res.status(400).json({
+          success: false,
+          message: "Urban member location is incomplete",
+        });
+      }
+    }
+
     // ==========================================
     // CLEAN CATEGORY & DESCRIPTION
     // ==========================================
@@ -170,6 +208,7 @@ export const createProblem = async (req, res) => {
     const duplicateFilter = {
       district: member.district,
       areaType: member.areaType,
+      block: member.block,
       ward: member.ward,
 
       category: {
@@ -189,9 +228,17 @@ export const createProblem = async (req, res) => {
     };
 
     // Urban area mein local body bhi check karo
+    if (member.areaType === "rural") {
+      duplicateFilter.block = member.block;
+      duplicateFilter.panchayat = member.panchayat;
+    }
+
     if (member.areaType === "urban") {
       duplicateFilter.localBody = member.localBody;
     }
+    // if (member.areaType === "urban") {
+    //   duplicateFilter.localBody = member.localBody;
+    // }
 
     const existingProblem = await Problem.findOne(duplicateFilter);
 
@@ -253,33 +300,33 @@ export const createProblem = async (req, res) => {
     // PHOTOS
     // ==========================================
 
-   const safePhotos = [];
+    const safePhotos = [];
 
-if (Array.isArray(req.files) && req.files.length > 0) {
-  for (const file of req.files) {
-    const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        {
-          folder: "jansuraaj/problems",
-          resource_type: "image",
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        }
-      );
+    if (Array.isArray(req.files) && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "jansuraaj/problems",
+              resource_type: "image",
+            },
+            (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            }
+          );
 
-      stream.end(file.buffer);
-    });
+          stream.end(file.buffer);
+        });
 
-    safePhotos.push(result.secure_url);
-  }
-}
+        safePhotos.push(result.secure_url);
+      }
+    }
 
-// ==========video link ===================//
+    // ==========video link ===================//
 
     let safeVideoLinks = [];
 
@@ -309,7 +356,15 @@ if (Array.isArray(req.files) && req.files.length > 0) {
       // Area backend/member DB se
       district: member.district,
       areaType: member.areaType,
-      localBody: member.localBody,
+
+      // Urban
+      localBody: member.areaType === "urban" ? member.localBody : "",
+
+      // Rural
+      block: member.areaType === "rural" ? member.block : "",
+
+      panchayat: member.areaType === "rural" ? member.panchayat : "",
+
       ward: member.ward,
 
       category: category.toString().trim(),
@@ -412,10 +467,31 @@ export const reportExistingProblem = async (req, res) => {
 
     const sameWard = member.ward === problem.ward;
 
-    const sameLocalBody =
-      member.areaType !== "urban" || member.localBody === problem.localBody;
+    let sameAreaDetails = false;
 
-    if (!sameDistrict || !sameAreaType || !sameWard || !sameLocalBody) {
+    // ==========================================
+    // RURAL AREA
+    // ==========================================
+
+    if (member.areaType === "rural") {
+      sameAreaDetails =
+        member.block === problem.block &&
+        member.panchayat === problem.panchayat;
+    }
+
+    // ==========================================
+    // URBAN AREA
+    // ==========================================
+
+    if (member.areaType === "urban") {
+      sameAreaDetails = member.localBody === problem.localBody;
+    }
+
+    // ==========================================
+    // FINAL SECURITY CHECK
+    // ==========================================
+
+    if (!sameDistrict || !sameAreaType || !sameWard || !sameAreaDetails) {
       return res.status(403).json({
         success: false,
         message: "You can only report problems from your own area",
@@ -528,10 +604,19 @@ export const getProblemById = async (req, res) => {
 
     const sameWard = member.ward === problem.ward;
 
-    const sameLocalBody =
-      member.areaType !== "urban" || member.localBody === problem.localBody;
+    let sameAreaDetails = false;
 
-    if (!sameDistrict || !sameAreaType || !sameWard || !sameLocalBody) {
+    if (member.areaType === "rural") {
+      sameAreaDetails =
+        member.block === problem.block &&
+        member.panchayat === problem.panchayat;
+    }
+
+    if (member.areaType === "urban") {
+      sameAreaDetails = member.localBody === problem.localBody;
+    }
+
+    if (!sameDistrict || !sameAreaType || !sameWard || !sameAreaDetails) {
       return res.status(403).json({
         success: false,
         message: "You can only view problems from your own area",

@@ -106,9 +106,9 @@ export const updateProfile = async (req, res) => {
 
     // JWT MEMBER
     // const member = await Member.findById(req.memberId);
-   
+
     // JOIN FLOW
-const member = await Member.findById(req.params.id);
+    const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -153,12 +153,65 @@ const member = await Member.findById(req.params.id);
 // ==================================
 export const updateLocation = async (req, res) => {
   try {
-    const {
-      district,
-      areaType,
-      localBody,
-      ward,
-    } = req.body;
+    const { district, areaType, localBody, block, panchayat, ward } = req.body;
+
+    // ==========================================
+    // BASIC LOCATION VALIDATION
+    // ==========================================
+
+    if (!district || !String(district).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "District is required",
+      });
+    }
+
+    if (!["rural", "urban"].includes(areaType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid area type is required",
+      });
+    }
+
+    if (!ward || !String(ward).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Ward is required",
+      });
+    }
+
+    // ==========================================
+    // RURAL VALIDATION
+    // ==========================================
+
+    if (areaType === "rural") {
+      if (!block || !String(block).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Block is required for rural area",
+        });
+      }
+
+      if (!panchayat || !String(panchayat).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Panchayat is required for rural area",
+        });
+      }
+    }
+
+    // ==========================================
+    // URBAN VALIDATION
+    // ==========================================
+
+    if (areaType === "urban") {
+      if (!localBody || !String(localBody).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Local body is required for urban area",
+        });
+      }
+    }
 
     // OLD FIREBASE QUERY
     /*
@@ -172,7 +225,7 @@ export const updateLocation = async (req, res) => {
     // const member = await Member.findById(req.memberId);
 
     // JOIN FLOW
-const member = await Member.findById(req.params.id);
+    const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -181,9 +234,26 @@ const member = await Member.findById(req.params.id);
       });
     }
 
+    // member.district = district || "";
+    // member.areaType = areaType || "";
+    // member.localBody = localBody || "";
+    // member.block = block || "";
+    // member.ward = ward || "";
+
     member.district = district || "";
     member.areaType = areaType || "";
-    member.localBody = localBody || "";
+
+    // ==========================================
+    // URBAN → Local Body
+    // RURAL → Block + Panchayat
+    // ==========================================
+
+    member.localBody = areaType === "urban" ? localBody || "" : "";
+
+    member.block = areaType === "rural" ? block || "" : "";
+
+    member.panchayat = areaType === "rural" ? panchayat || "" : "";
+
     member.ward = ward || "";
 
     await member.save();
@@ -288,9 +358,7 @@ export const completeMember = async (req, res) => {
     }
 
     // Sirf digits
-    const digits = String(phone)
-      .replace(/\D/g, "")
-      .slice(-10);
+    const digits = String(phone).replace(/\D/g, "").slice(-10);
 
     // 10 digit validation
     if (!/^\d{10}$/.test(digits)) {
@@ -326,45 +394,42 @@ export const completeMember = async (req, res) => {
     }
 
     // Save phone
-  member.phone = phoneNumber;
+    member.phone = phoneNumber;
 
-member.registrationStatus = "completed";
+    member.registrationStatus = "completed";
 
-await member.save();
+    await member.save();
 
-// ==========================================
-// CREATE JWT
-// ==========================================
-const token = jwt.sign(
-  {
-    memberId: member._id.toString(),
-    phone: member.phone,
-  },
-  process.env.JWT_SECRET,
-  {
-    expiresIn: "7d",
-  }
-);
+    // ==========================================
+    // CREATE JWT
+    // ==========================================
+    const token = jwt.sign(
+      {
+        memberId: member._id.toString(),
+        phone: member.phone,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
-// ==========================================
-// SET HTTPONLY COOKIE
-// ==========================================
-res.cookie("authToken", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite:
-    process.env.NODE_ENV === "production"
-      ? "none"
-      : "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-  path: "/",
-});
+    // ==========================================
+    // SET HTTPONLY COOKIE
+    // ==========================================
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
 
-return res.status(200).json({
-  success: true,
-  message: "Registration completed successfully",
-  member,
-});
+    return res.status(200).json({
+      success: true,
+      message: "Registration completed successfully",
+      member,
+    });
   } catch (error) {
     console.error("Complete member error:", error);
 
@@ -382,19 +447,7 @@ return res.status(200).json({
 // ==================================
 export const getMember = async (req, res) => {
   try {
-    // OLD FIREBASE QUERY
-    /*
-    const member = await Member.findOne({
-      _id: req.params.id,
-      firebaseUid: req.firebaseUid,
-    });
-    */
-
-    // JWT MEMBER
-    // const member = await Member.findById(req.memberId);
-
-    // JOIN FLOW
-const member = await Member.findById(req.params.id);
+    const member = await Member.findById(req.params.id);
 
     if (!member) {
       return res.status(404).json({
@@ -416,6 +469,34 @@ const member = await Member.findById(req.params.id);
   }
 };
 
+// export const getMember = async (req, res) => {
+//   try {
+// OLD FIREBASE QUERY
+/*
+    const member = await Member.findOne({
+      _id: req.params.id,
+      firebaseUid: req.firebaseUid,
+    });
+    */
+
+// JWT MEMBER
+// const member = await Member.findById(req.memberId);
+
+// JOIN FLOW
+
+//     return res.status(200).json({
+//       success: true,
+//       member,
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch member",
+//       error: error.message,
+//     });
+//   }
+// };
+
 // ==================================
 // GET MY PROFILE
 // GET /api/members/me
@@ -431,8 +512,6 @@ export const getMyProfile = async (req, res) => {
 
     // JWT MEMBER
     const member = await Member.findById(req.memberId);
-
-    
 
     if (!member) {
       return res.status(404).json({
