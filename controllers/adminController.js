@@ -1,4 +1,5 @@
 import Member from "../models/memberModel.js";
+import Problem from "../models/problemModel.js";
 
 export const getUserCount = async (req, res) => {
   try {
@@ -21,9 +22,10 @@ export const getUserCount = async (req, res) => {
 };
 
 // ==========================================
-// GET ALL JOINED USERS
+// GET ALL JOINED USERS WITH ISSUE COUNT
 // GET /api/admin/users
 // ==========================================
+
 export const getAllUsers = async (req, res) => {
   try {
     const users = await Member.find({
@@ -32,12 +34,29 @@ export const getAllUsers = async (req, res) => {
       .select(
         "photo firstName middleName lastName name phone district areaType localBody ward createdAt registrationStatus"
       )
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const usersWithIssueCount = await Promise.all(
+      users.map(async (user) => {
+        const issueCount = await Problem.countDocuments({
+          createdBy: user._id,
+        });
+
+        //         console.log("USER:", user._id);
+        // console.log("ISSUE COUNT:", issueCount);
+
+        return {
+          ...user,
+          issueCount,
+        };
+      })
+    );
 
     return res.status(200).json({
       success: true,
-      totalUsers: users.length,
-      users,
+      totalUsers: usersWithIssueCount.length,
+      users: usersWithIssueCount,
     });
   } catch (error) {
     console.error("Get all users error:", error);
