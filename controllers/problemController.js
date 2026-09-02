@@ -34,12 +34,40 @@ export const getMyAreaProblems = async (req, res) => {
     // LOCATION CHECK
     // ==========================================
 
-    if (!member.district || !member.areaType || !member.block || !member.ward) {
-      return res.status(400).json({
-        success: false,
-        message: "Member location is incomplete",
-      });
-    }
+    // if (!member.district || !member.areaType || !member.block || !member.ward) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Member location is incomplete",
+    //   });
+    // }
+
+    // Common location check
+if (!member.district || !member.areaType || !member.ward) {
+  return res.status(400).json({
+    success: false,
+    message: "Member location is incomplete",
+  });
+}
+
+// Rural location check
+if (member.areaType === "rural") {
+  if (!member.block || !member.panchayat) {
+    return res.status(400).json({
+      success: false,
+      message: "Rural member location is incomplete",
+    });
+  }
+}
+
+// Urban location check
+if (member.areaType === "urban") {
+  if (!member.localBody) {
+    return res.status(400).json({
+      success: false,
+      message: "Urban member location is incomplete",
+    });
+  }
+}
 
     // ==========================================
     // AREA FILTER
