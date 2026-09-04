@@ -49,15 +49,23 @@ const wardHeadSchema = new mongoose.Schema(
     },
 
     // ==================================
-    // Assigned Location
+    // District
+    //
+    // Store district ID
+    // Example: BHAGALPUR
     // ==================================
 
     district: {
       type: String,
       required: true,
       trim: true,
+      uppercase: true,
       index: true,
     },
+
+    // ==================================
+    // Area Type
+    // ==================================
 
     areaType: {
       type: String,
@@ -68,41 +76,62 @@ const wardHeadSchema = new mongoose.Schema(
 
     // ==================================
     // Urban Area
+    //
+    // Example:
+    // BHAGALPUR_MUNICIPAL_CORPORATION
     // ==================================
 
     localBody: {
       type: String,
       default: "",
       trim: true,
+      uppercase: true,
       index: true,
     },
 
     // ==================================
     // Rural Area
+    //
+    // Example:
+    // BIHPUR
     // ==================================
 
     block: {
       type: String,
       default: "",
       trim: true,
+      uppercase: true,
       index: true,
     },
+
+    // ==================================
+    // Panchayat
+    //
+    // Example:
+    // BIHPUR_GPS_1
+    // ==================================
 
     panchayat: {
       type: String,
       default: "",
       trim: true,
+      uppercase: true,
       index: true,
     },
 
     // ==================================
-    // Assigned Ward
+    // Ward
+    //
+    // Standard:
+    // ward_01
+    // ward_02
     // ==================================
 
     ward: {
       type: String,
       required: true,
       trim: true,
+      lowercase: true,
       index: true,
 
       set: (value) => {
@@ -111,6 +140,7 @@ const wardHeadSchema = new mongoose.Schema(
         const ward = String(value).trim();
 
         // Already ward_03 format
+
         if (/^ward_\d+$/i.test(ward)) {
           const number = ward
             .replace(/^ward_/i, "")
@@ -120,7 +150,7 @@ const wardHeadSchema = new mongoose.Schema(
         }
 
         // Only number
-        // 3 -> ward_03
+
         if (/^\d+$/.test(ward)) {
           return `ward_${ward.padStart(
             2,
@@ -128,7 +158,7 @@ const wardHeadSchema = new mongoose.Schema(
           )}`;
         }
 
-        return ward;
+        return ward.toLowerCase();
       },
     },
 
@@ -155,8 +185,6 @@ const wardHeadSchema = new mongoose.Schema(
         "rejected",
       ],
 
-      // New registration will always
-      // wait for Super Admin approval
       default: "pending",
 
       index: true,
@@ -182,7 +210,6 @@ const wardHeadSchema = new mongoose.Schema(
   }
 );
 
-
 // ==================================
 // Validate Location Before Save
 // ==================================
@@ -203,11 +230,11 @@ wardHeadSchema.pre(
         );
       }
 
-      // Urban area me rural fields empty
+      // Clear rural fields
+
       this.block = "";
       this.panchayat = "";
     }
-
 
     // ==================================
     // Rural Ward Head
@@ -227,12 +254,12 @@ wardHeadSchema.pre(
         );
       }
 
-      // Rural area me urban field empty
+      // Clear urban field
+
       this.localBody = "";
     }
   }
 );
-
 
 // ==================================
 // Hash Password Before Save
@@ -242,19 +269,16 @@ wardHeadSchema.pre(
   "save",
   async function () {
 
-    // Password change nahi hua
     if (!this.isModified("password")) {
       return;
     }
 
-    // Password hash
     this.password = await bcrypt.hash(
       this.password,
       12
     );
   }
 );
-
 
 // ==================================
 // Compare Password
@@ -270,7 +294,6 @@ wardHeadSchema.methods.comparePassword =
       this.password
     );
   };
-
 
 // ==================================
 // Prevent Multiple Ward Heads
@@ -291,7 +314,6 @@ wardHeadSchema.index(
     unique: true,
   }
 );
-
 
 // ==================================
 // Model

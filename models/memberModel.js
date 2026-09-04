@@ -3,23 +3,9 @@ import mongoose from "mongoose";
 const memberSchema = new mongoose.Schema(
   {
     // ==================================
-    // Firebase User ID - OLD
-    // ==================================
-
-    /*
-    firebaseUid: {
-      type: String,
-      default: null,
-      unique: true,
-      sparse: true,
-      index: true,
-      trim: true,
-    },
-    */
-
-    // ==================================
     // Mobile Number
     // ==================================
+
     phone: {
       type: String,
       default: undefined,
@@ -32,6 +18,7 @@ const memberSchema = new mongoose.Schema(
     // ==================================
     // Profile Photo
     // ==================================
+
     photo: {
       type: String,
       default: "",
@@ -41,6 +28,7 @@ const memberSchema = new mongoose.Schema(
     // ==================================
     // Name
     // ==================================
+
     firstName: {
       type: String,
       default: "",
@@ -72,6 +60,7 @@ const memberSchema = new mongoose.Schema(
     // ==================================
     // Personal Details
     // ==================================
+
     education: {
       type: String,
       default: "",
@@ -91,29 +80,27 @@ const memberSchema = new mongoose.Schema(
       default: [],
     },
 
-    // Aadhaar
-    // aadhaar: {
-    //   type: String,
-    //   default: "",
-    //   trim: true,
-    //   select: false,
-    //   match: [/^\d{0,12}$/, "Invalid Aadhaar number"],
-    // },
-
     // ==================================
     // Location
     // ==================================
+
     district: {
       type: String,
       default: "",
       trim: true,
+      index: true,
     },
 
     areaType: {
       type: String,
       enum: ["", "rural", "urban"],
       default: "",
+      index: true,
     },
+
+    // ==================================
+    // Urban Location
+    // ==================================
 
     localBody: {
       type: String,
@@ -123,8 +110,9 @@ const memberSchema = new mongoose.Schema(
     },
 
     // ==================================
-    // Block
+    // Rural Location
     // ==================================
+
     block: {
       type: String,
       default: "",
@@ -132,10 +120,6 @@ const memberSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ==================================
-    // Panchayat
-    // Rural area ke liye
-    // ==================================
     panchayat: {
       type: String,
       default: "",
@@ -143,22 +127,36 @@ const memberSchema = new mongoose.Schema(
       index: true,
     },
 
+    // ==================================
+    // Ward
+    // ==================================
+
     ward: {
       type: String,
       default: "",
       trim: true,
+      index: true,
 
       set: (value) => {
         if (!value) return "";
 
         const ward = String(value).trim();
 
-        // अगर पहले से ward_03 format है
+        // ward_3 -> ward_03
+        // WARD_3 -> ward_03
+        // ward_03 -> ward_03
+
         if (/^ward_\d+$/i.test(ward)) {
-          return ward.toLowerCase();
+          const number = ward
+            .replace(/^ward_/i, "")
+            .padStart(2, "0");
+
+          return `ward_${number}`;
         }
 
-        // अगर सिर्फ 3, 4, 12 आदि आया है
+        // 3 -> ward_03
+        // 12 -> ward_12
+
         if (/^\d+$/.test(ward)) {
           return `ward_${ward.padStart(2, "0")}`;
         }
@@ -170,6 +168,7 @@ const memberSchema = new mongoose.Schema(
     // ==================================
     // Registration Status
     // ==================================
+
     registrationStatus: {
       type: String,
       enum: ["draft", "completed"],
@@ -182,6 +181,9 @@ const memberSchema = new mongoose.Schema(
   }
 );
 
-const Member = mongoose.model("Member", memberSchema);
+const Member = mongoose.model(
+  "Member",
+  memberSchema
+);
 
 export default Member;

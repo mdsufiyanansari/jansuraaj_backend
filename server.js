@@ -16,6 +16,8 @@ import wardHeadAuthRoutes from "./routes/wardHeadAuthRoutes.js"
 
 import wardHeadApprovalRoutes from "./routes/wardHeadApprovalRoutes.js"
 
+import wardHeadRoutes from "./routes/wardHeadRoutes.js";
+
 const app = express();
 
 // ==========================================
@@ -79,6 +81,11 @@ app.use("/api/support", supportRoutes);
 app.use(
   "/api/ward-head/auth",
   wardHeadAuthRoutes
+);
+
+app.use(
+  "/api/ward-head",
+  wardHeadRoutes
 );
 
 //======SUPER_ADMIN_APPROVAL_ROUTES==========//
