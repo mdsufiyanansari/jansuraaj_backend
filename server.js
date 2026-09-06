@@ -12,11 +12,13 @@ import problemRouter from "./routes/problemRoutes.js";
 
 import adminRoutes from "./routes/adminRoutes.js";
 import supportRoutes from "./routes/supportRoutes.js";
-import wardHeadAuthRoutes from "./routes/wardHeadAuthRoutes.js"
+import wardHeadAuthRoutes from "./routes/wardHeadAuthRoutes.js";
 
-import wardHeadApprovalRoutes from "./routes/wardHeadApprovalRoutes.js"
+import wardHeadApprovalRoutes from "./routes/wardHeadApprovalRoutes.js";
 
 import wardHeadRoutes from "./routes/wardHeadRoutes.js";
+
+import wardHeadProblemRoutes from "./routes/wardHeadProblemRoutes.js";
 
 const app = express();
 
@@ -78,22 +80,15 @@ app.use("/api/problems", problemRouter);
 app.use("/api/support", supportRoutes);
 
 //======================WARD HEAD ROUTES=========//
-app.use(
-  "/api/ward-head/auth",
-  wardHeadAuthRoutes
-);
+app.use("/api/ward-head/auth", wardHeadAuthRoutes);
 
-app.use(
-  "/api/ward-head",
-  wardHeadRoutes
-);
+app.use("/api/ward-head", wardHeadRoutes);
+
+app.use("/api/ward-head/problems", wardHeadProblemRoutes);
 
 //======SUPER_ADMIN_APPROVAL_ROUTES==========//
 
-app.use(
-  "/api/super-admin/ward-heads",
-  wardHeadApprovalRoutes
-);
+app.use("/api/super-admin/ward-heads", wardHeadApprovalRoutes);
 
 //====================admin-routes=============//
 app.use("/api/admin", adminRoutes);

@@ -233,6 +233,90 @@ const problemSchema = new mongoose.Schema(
     },
 
     // ==================================
+    // WARD HEAD STATUS UPDATE DETAILS
+    // ==================================
+
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WardHead",
+      default: null,
+    },
+
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
+
+    progressNote: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    expectedCompletionDate: {
+      type: Date,
+      default: null,
+    },
+
+    resolvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WardHead",
+      default: null,
+    },
+
+    resolvedAt: {
+      type: Date,
+      default: null,
+    },
+
+    resolutionNote: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    completionPhotos: {
+      type: [String],
+      default: [],
+    },
+
+    // ==================================
+    // STATUS HISTORY
+    // ==================================
+
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["pending", "in-progress", "resolved"],
+          required: true,
+        },
+
+        note: {
+          type: String,
+          default: "",
+          trim: true,
+        },
+
+        updatedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "WardHead",
+          required: true,
+        },
+
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+
+        expectedCompletionDate: {
+          type: Date,
+          default: null,
+        },
+      },
+    ],
+
+    // ==================================
     // Members who reported this problem
     // ==================================
     reportedBy: [
