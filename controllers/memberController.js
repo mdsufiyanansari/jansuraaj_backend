@@ -127,6 +127,14 @@ export const updateProfile = async (req, res) => {
 
     member.skills = Array.isArray(skills) ? skills : [];
 
+    // ==========================================
+    // PROFILE PHOTO UPDATE
+    // ==========================================
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      member.photo = result.secure_url;
+    }
+
     // member.aadhaar = aadhaar || "";
 
     await member.save();

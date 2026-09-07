@@ -17,23 +17,13 @@ import {
 const router = express.Router();
 
 // Step 1
-router.post(
-  "/",
-  upload.single("photo"),
-  createMember
-);
+router.post("/", upload.single("photo"), createMember);
 
 // Step 2
-router.put(
-  "/:id/profile",
-  updateProfile
-);
+router.put("/:id/profile", upload.single("photo"), updateProfile);
 
 // Step 3
-router.put(
-  "/:id/location",
-  updateLocation
-);
+router.put("/:id/location", updateLocation);
 
 // Step 4
 router.put("/:id/complete", completeMember);
@@ -48,16 +38,9 @@ router.put(
 */
 
 // Get my profile - MUST come before /:id
-router.get(
-  "/me",
-  authFirebase,
-  getMyProfile
-);
+router.get("/me", authFirebase, getMyProfile);
 
 // Get member by ID
-router.get(
-  "/:id",
-  getMember
-);
+router.get("/:id", getMember);
 
 export default router;
