@@ -20,6 +20,8 @@ import wardHeadRoutes from "./routes/wardHeadRoutes.js";
 
 import wardHeadProblemRoutes from "./routes/wardHeadProblemRoutes.js";
 
+import superAdminAuthRoutes from "./routes/superAdminAuthRoutes.js";
+
 const app = express();
 
 // ==========================================
@@ -87,6 +89,11 @@ app.use("/api/ward-head", wardHeadRoutes);
 app.use("/api/ward-head/problems", wardHeadProblemRoutes);
 
 //======SUPER_ADMIN_APPROVAL_ROUTES==========//
+
+app.use(
+  "/api/super-admin/auth",
+  superAdminAuthRoutes
+);
 
 app.use("/api/super-admin/ward-heads", wardHeadApprovalRoutes);
 

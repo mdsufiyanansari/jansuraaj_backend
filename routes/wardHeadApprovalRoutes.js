@@ -8,8 +8,11 @@ import {
   rejectWardHead,
 } from "../controllers/wardHeadApprovalController.js";
 
-const router = express.Router();
+import {
+  protectSuperAdmin,
+} from "../middleware/superAdminAuthMiddleware.js";
 
+const router = express.Router();
 
 // ==================================
 // Get All Ward Heads
@@ -25,9 +28,9 @@ const router = express.Router();
 
 router.get(
   "/",
+  protectSuperAdmin,
   getAllWardHeads
 );
-
 
 // ==================================
 // Get Pending Ward Heads
@@ -41,9 +44,9 @@ router.get(
 
 router.get(
   "/pending",
+  protectSuperAdmin,
   getPendingWardHeads
 );
-
 
 // ==================================
 // Get Single Ward Head
@@ -54,9 +57,9 @@ router.get(
 
 router.get(
   "/:id",
+  protectSuperAdmin,
   getWardHeadById
 );
-
 
 // ==================================
 // Approve Ward Head
@@ -67,9 +70,9 @@ router.get(
 
 router.patch(
   "/:id/approve",
+  protectSuperAdmin,
   approveWardHead
 );
-
 
 // ==================================
 // Reject Ward Head
@@ -85,8 +88,8 @@ router.patch(
 
 router.patch(
   "/:id/reject",
+  protectSuperAdmin,
   rejectWardHead
 );
-
 
 export default router;
