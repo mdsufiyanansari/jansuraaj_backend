@@ -178,3 +178,87 @@ const reporterOtherReports = reporterId
     });
   }
 };
+
+// ==========================================
+// DELETE / SOFT DELETE PROBLEM
+// DELETE /api/admin/problems/:id
+// ==========================================
+
+export const deleteProblem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { deletionReason } = req.body;
+
+    // ======================================
+    // DELETE REASON VALIDATION
+    // ======================================
+
+    if (!deletionReason?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Deletion reason is required",
+      });
+    }
+
+    // ======================================
+    // FIND PROBLEM
+    // ======================================
+
+    const problem = await Problem.findById(id);
+
+    if (!problem) {
+      return res.status(404).json({
+        success: false,
+        message: "Problem not found",
+      });
+    }
+
+    // ======================================
+    // ALREADY DELETED CHECK
+    // ======================================
+
+    if (problem.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: "Problem is already deleted",
+      });
+    }
+
+    // ======================================
+    // SOFT DELETE
+    // ======================================
+
+    problem.isDeleted = true;
+    problem.deletedAt = new Date();
+    problem.deletedBy = req.superAdminId;
+    problem.deletionReason = deletionReason.trim();
+
+    await problem.save();
+
+    // ======================================
+    // SUCCESS RESPONSE
+    // ======================================
+
+    return res.status(200).json({
+      success: true,
+      message: "Problem deleted successfully",
+      problem: {
+        _id: problem._id,
+        isDeleted: problem.isDeleted,
+        deletedAt: problem.deletedAt,
+        deletedBy: problem.deletedBy,
+        deletionReason: problem.deletionReason,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Delete problem error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete problem",
+    });
+  }
+};

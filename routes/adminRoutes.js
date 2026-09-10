@@ -8,6 +8,7 @@ import {
 import {
   getAllReportedProblems,
   getProblemById,
+  deleteProblem,
 } from "../controllers/adminProblemController.js";
 
 import {
@@ -48,6 +49,13 @@ router.get(
   "/problems/:id",
   protectSuperAdmin,
   getProblemById
+);
+
+// Delete problem
+router.delete(
+  "/problems/:id",
+  protectSuperAdmin,
+  deleteProblem
 );
 
 export default router;

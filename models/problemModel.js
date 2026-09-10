@@ -332,6 +332,33 @@ const problemSchema = new mongoose.Schema(
       default: 1,
       min: 1,
     },
+    // ==================================
+// SUPER ADMIN DELETE / SOFT DELETE
+// ==================================
+
+isDeleted: {
+  type: Boolean,
+  default: false,
+  index: true,
+},
+
+deletedAt: {
+  type: Date,
+  default: null,
+},
+
+deletedBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "SuperAdmin",
+  default: null,
+},
+
+deletionReason: {
+  type: String,
+  default: "",
+  trim: true,
+  maxlength: 500,
+},
   },
   {
     timestamps: true,
